@@ -1,4 +1,4 @@
-// SSE Event Types for the Streaming Pipeline
+// Shared types for SSE streaming pipeline and chat messages
 
 export type Intent = "work_authorization" | "visa_status" | "asylum" | 
                      "enforcement" | "family" | "naturalization" | "other"

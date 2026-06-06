@@ -1,3 +1,5 @@
+// Chat input with inline send button, starter question chips, and Enter-to-send
+
 import type { KeyboardEvent } from "react"
 
 export function ChatInput(props: {
@@ -36,7 +38,7 @@ export function ChatInput(props: {
                 )}
             </div>
             {props.showStarters && (
-                <div className="flex overflow-hidden gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                     {[
                         "What are my rights if I'm detained by ICE?",
                         "How do I apply for asylum?",

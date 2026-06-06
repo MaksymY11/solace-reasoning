@@ -1,6 +1,6 @@
 "use client"
 
-// TODO: CONVERSATION MEMORY
+// TODO: Add conversation memory (pass message history to research agent)
 
 import { useState } from "react"
 import { Message, SSEEvent } from "@/lib/types"
@@ -57,25 +57,33 @@ export default function Home() {
           if (!part.trim()) continue
           const json = part.replace("data: ", "")
           const event = JSON.parse(json) as SSEEvent
-          if (event.type === "content") {
-            setMessages(prev => prev.map( m => 
+          switch (event.type) {
+            case "content": {
+              setMessages(prev => prev.map( m => 
               m.id === assistantId ? {...m, content: m.content + event.data} : m
-            ))
-          } else if (event.type === "triage") {
-            setMessages(prev => prev.map( m =>
-              m.id === assistantId ? {...m, triage: event.data} : m
-            ))
-          } else if (event.type === "feedback") {
-            setMessages(prev => prev.map( m =>
-              m.id === assistantId ? {...m, feedback: event.data} : m
-            ))
-          } else if (event.type === "error") {
-            setMessages(prev => prev.map ( m =>
-              m.id === assistantId ? {...m, content: event.data.message, loading: false} : m
-            ))
-            error = true
-            break
-          } 
+              ))
+              break
+            }
+            case "triage": {
+              setMessages(prev => prev.map( m =>
+                m.id === assistantId ? {...m, triage: event.data} : m
+              ))
+              break
+            }
+            case "feedback": {
+              setMessages(prev => prev.map( m =>
+                m.id === assistantId ? {...m, feedback: event.data} : m
+              ))
+              break
+            }
+            case "error": {
+              setMessages(prev => prev.map ( m =>
+                m.id === assistantId ? {...m, content: event.data.message, loading: false} : m
+              ))
+              error = true
+              break
+            }
+          }
         }
       }
 
@@ -102,37 +110,51 @@ export default function Home() {
     }
   }
 
+  const isEmpty = messages.length === 0
+
   return (
-    <main className="flex min-h-screen flex-col items-center p-8">
+    <main className="flex min-h-screen flex-col items-center p-4 sm:p-8">
       <div className="self-start flex items-center gap-2">
         <img src={"solace_logo_cropped.png"} alt="Solace" className="h-12 w-auto" />
-        <span className="text-lg font-semibold">Solace</span>
+        <span className="text-xl font-semibold">Solace</span>
       </div>
-      <div className={messages.length === 0 
+      <div className={isEmpty  
         ? "flex-1 flex items-center"
-        : "flex-1 flex flex-col items-center w-full"
-      }
-      >
-        <div className={`w-full max-w-xl flex flex-col gap-4 ${messages.length > 0 ? "flex-1" : ""}`}>
-          {messages.length ===0 && (
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <img src={"solace_logo_cropped.png"} alt="Solace" className="h-7 w-auto" />
-              <span className="text-xl">Hello, I&apos;m <strong className="text-[#017b80]">Solace</strong></span>
-            </div>
+        : "flex-1 flex flex-col items-center w-full mt-16"
+      }>
+        <div className={`w-full max-w-xl flex flex-col gap-4 ${isEmpty ? "" : "flex-1"}`}>
+          {isEmpty ? (
+            <>
+              <div className="flex items-center justify-center gap-2">
+                <img src={"solace_logo_cropped.png"} alt="Solace" className="h-10 w-auto" />
+                <span className="text-xl sm:text-3xl">Hello, I&apos;m <strong className="text-[#017b80]">Solace</strong></span>
+              </div>
+              <ChatInput 
+                input={input} 
+                setInput={setInput} 
+                onSend={handleSend} 
+                loading={loading}
+                showStarters={messages.length === 0}
+              />
+            </>
+          ) : (
+            <ChatMessages messages={messages} />
           )}
-          <ChatMessages
-            messages={messages}
-          />
-          <ChatInput 
-            input={input} 
-            setInput={setInput} 
-            onSend={handleSend} 
-            loading={loading}
-            showStarters={messages.length === 0}
-          />
         </div>
       </div>
+      {!isEmpty && (
+        <div className="fixed bottom-0 left-0 right-0 flex justify-center px-4 sm:p-8 pb-8 bg-[#fff7e1]">
+          <div className="w-full max-w-xl">
+            <ChatInput 
+              input={input} 
+              setInput={setInput} 
+              onSend={handleSend} 
+              loading={loading}
+              showStarters={messages.length === 0}
+            />
+          </div>
+        </div>
+      )}
     </main>
   )
 }
-

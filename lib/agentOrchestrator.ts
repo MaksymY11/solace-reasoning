@@ -1,4 +1,4 @@
-// Three-agent sequential pipeline
+// Three-agent sequential pipeline: Triage → Research (streaming) → Feedback
 
 import { getClient } from "./foundryClient";
 import { TriageEvent, ErrorEvent, ContentEvent, FeedbackEvent, DoneEvent } from "./types";
@@ -47,7 +47,8 @@ export function orchestrate(message:string): ReadableStream {
             return;
         }
 
-        // Research Agent helper (for handling tool call requests)
+        // Research agent helper
+        // Research agent requires MCP tool approval for Web Search and Knowledge Base
         let approvalReqId = ""
         let responseId = ""
 

@@ -23,6 +23,7 @@
   }
 }
 
+/* Three-dot rotating loader from css-loaders.com */
 @layer base {
   .loader {
     width: 20px;

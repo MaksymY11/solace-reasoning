@@ -1,4 +1,4 @@
-// Renders the conversation (scrollable list of user and assistant messages)
+// Scrollable message list with auto-scroll on new content
 
 import { Message } from "@/lib/types"
 import { useRef,useEffect } from "react"
@@ -14,7 +14,7 @@ export function ChatMessages(props: {
     }, [props.messages])
 
     return (
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto pb-32">
             {props.messages.map(msg => (
                 <div key={msg.id} className={msg.role === "user" ? "text-right" : "text-left"}>
                     <div className={msg.role === "user"
