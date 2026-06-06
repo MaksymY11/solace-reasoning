@@ -21,7 +21,7 @@ export function ChatMessages(props: {
                         ? "inline-block bg-[#6bc6af] text-black rounded-lg px-4 py-2"
                         : "text-black py-2 whitespace-pre-wrap"}>
                     {msg.content}
-                    {msg.loading && "..."}
+                    {msg.loading && <div className="loader" />}
                     </div>
                 </div>
             ))}

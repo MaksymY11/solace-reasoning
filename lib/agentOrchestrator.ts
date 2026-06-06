@@ -47,6 +47,26 @@ export function orchestrate(message:string): ReadableStream {
             return;
         }
 
+        // Research Agent helper (for handling tool call requests)
+        let approvalReqId = ""
+        let responseId = ""
+
+        async function streamResearch(researchResponse:any) {
+            for await (const chunk of researchResponse) {
+                if (chunk.type === "response.output_text.delta") {
+                    researchResult += chunk.delta;
+                    const event: ContentEvent = { type: "content", data: chunk.delta };
+                    controller.enqueue(`data: ${JSON.stringify(event)}\n\n`)
+                }
+                if (chunk.type === "response.output_item.added" && chunk.item.type === "mcp_approval_request") {
+                    approvalReqId = chunk.item.id
+                }
+                if (chunk.type === "response.completed") {
+                    responseId = chunk.response.id
+                }
+            }
+        }
+
         // Research Agent (streaming)
         openai = client.getOpenAIClient({
             azureConfig: {agentName: solace_research, allowPreview: true},
@@ -60,21 +80,36 @@ export function orchestrate(message:string): ReadableStream {
         `
         let researchResult = ""
         try {
-            const research_response = await openai.responses.create({
+            let researchResponse = await openai.responses.create({
                 model: "gpt-4.1",
                 input: research_input,
                 stream: true
             })
 
-            for await (const chunk of research_response) {
-                if (chunk.type === "response.output_text.delta") {
-                    researchResult += chunk.delta;
-                    const event: ContentEvent = {
-                        type: "content",
-                        data: chunk.delta,
-                    };
-                    controller.enqueue(`data: ${JSON.stringify(event)}\n\n`)
-                }
+            await streamResearch(researchResponse)
+
+            while (approvalReqId) {
+                const reqId = approvalReqId
+                approvalReqId = ""
+                researchResponse = await openai.responses.create({
+                    model: "gpt-4.1",
+                    previous_response_id: responseId,
+                    input: [{
+                        type: "mcp_approval_response",
+                        approval_request_id: reqId,
+                        approve: true
+                    }],
+                    stream: true,
+                })
+                await streamResearch(researchResponse)
+            }
+
+            if (researchResult.length === 0) {
+                const event: ContentEvent = {
+                    type: "content",
+                    data: "I wasn't able to research this topic. Please try rephrasing your question with more detail."
+                };
+                controller.enqueue(`data: ${JSON.stringify(event)}\n\n`)
             }
         }
         catch (e) {

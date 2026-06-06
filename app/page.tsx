@@ -103,21 +103,34 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-8">
-      <h1 className="text-2xl font-semibold mb-6">
-        Solace
-      </h1>
-      <div className="w-full max-w-xl flex flex-col gap-4">
-        <ChatMessages
-          messages={messages}
-        />
-        <ChatInput 
-          input={input} 
-          setInput={setInput} 
-          onSend={handleSend} 
-          loading={loading}
-          showStarters={messages.length === 0}
-        />
+    <main className="flex min-h-screen flex-col items-center p-8">
+      <div className="self-start flex items-center gap-2">
+        <img src={"solace_logo_cropped.png"} alt="Solace" className="h-12 w-auto" />
+        <span className="text-lg font-semibold">Solace</span>
+      </div>
+      <div className={messages.length === 0 
+        ? "flex-1 flex items-center"
+        : "flex-1 flex flex-col items-center w-full"
+      }
+      >
+        <div className={`w-full max-w-xl flex flex-col gap-4 ${messages.length > 0 ? "flex-1" : ""}`}>
+          {messages.length ===0 && (
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <img src={"solace_logo_cropped.png"} alt="Solace" className="h-7 w-auto" />
+              <span className="text-xl">Hello, I&apos;m <strong className="text-[#017b80]">Solace</strong></span>
+            </div>
+          )}
+          <ChatMessages
+            messages={messages}
+          />
+          <ChatInput 
+            input={input} 
+            setInput={setInput} 
+            onSend={handleSend} 
+            loading={loading}
+            showStarters={messages.length === 0}
+          />
+        </div>
       </div>
     </main>
   )
