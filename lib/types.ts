@@ -27,9 +27,14 @@ export interface TriageResult {
     summary: string,
 }
 
+export interface FollowUpQuestion {
+    question: string,
+    options: string[] | null,
+}
+
 export interface FeedbackResult {
     gaps: string[],
-    follow_up_questions: string[],
+    follow_up_questions: FollowUpQuestion[],
     next_steps: string[],
     needs_attorney: boolean,
 }

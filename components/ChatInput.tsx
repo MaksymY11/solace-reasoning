@@ -20,11 +20,11 @@ export function ChatInput(props: {
     return (
         <>
             <div className="relative">
-                <textarea className="w-full border border-[#017b80] rounded p-3 focus:outline-none focus:ring-2 focus:ring-[#017b80]"
+                <textarea className="w-full border border-[#017b80] bg-[#efe5cb] rounded p-3 focus:outline-none focus:ring-2 focus:ring-[#017b80] resize-none"
                 value={props.input}
                 onChange={(e)=>props.setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder={props.showStarters ? "Ask about your immigration rights..." : ""}
+                placeholder={props.showStarters ? "Ask about your immigration rights..." : "Write a message..."}
                 />
                 {props.input.trim() && (
                     <button 

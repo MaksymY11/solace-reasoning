@@ -6,23 +6,26 @@ import { useState } from "react"
 import { Message, SSEEvent } from "@/lib/types"
 import { ChatInput } from "@/components/ChatInput"
 import { ChatMessages } from "@/components/ChatMessages"
+import { FollowUpForm } from "@/components/FollowUpForm"
+import { FollowUpQuestion } from "@/lib/types"
 
 export default function Home() {
   const [input, setInput] = useState("")
   const [messages, setMessages] = useState<Message[]>([])
   const loading = messages.length > 0 && messages[messages.length-1].loading === true
 
-  async function handleSend() {
+  async function handleSend(overrideMessage?: string) {
     
-    if (!input.trim() || loading) {
+    const text = overrideMessage ?? input
+    if (!text.trim() || loading) {
       return
     }
-
     setInput("")
+
     const userMessage: Message = {
       id: crypto.randomUUID(),
       role: "user",
-      content: input,
+      content: text,
     }
     const assistantMessage: Message = {
       id: crypto.randomUUID(),
@@ -36,7 +39,7 @@ export default function Home() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({message:input}),
+        body: JSON.stringify({message:text}),
       })
 
       // Read loop
@@ -112,6 +115,9 @@ export default function Home() {
 
   const isEmpty = messages.length === 0
 
+  const lastMessage = messages[messages.length-1]
+  const filteredQuestions = (lastMessage?.feedback?.follow_up_questions ?? []).filter(q=>q.options!=null)
+
   return (
     <main className="flex min-h-screen flex-col items-center p-4 sm:p-8">
       <div className="self-start flex items-center gap-2">
@@ -129,10 +135,11 @@ export default function Home() {
                 <img src={"solace_logo_cropped.png"} alt="Solace" className="h-10 w-auto" />
                 <span className="text-xl sm:text-3xl">Hello, I&apos;m <strong className="text-[#017b80]">Solace</strong></span>
               </div>
+
               <ChatInput 
-                input={input} 
+                input={input}
                 setInput={setInput} 
-                onSend={handleSend} 
+                onSend={() => handleSend()} 
                 loading={loading}
                 showStarters={messages.length === 0}
               />
@@ -145,13 +152,23 @@ export default function Home() {
       {!isEmpty && (
         <div className="fixed bottom-0 left-0 right-0 flex justify-center px-4 sm:p-8 pb-8 bg-[#fff7e1]">
           <div className="w-full max-w-xl">
+              {filteredQuestions.length > 0 && 
+                <FollowUpForm
+                  questions={filteredQuestions}
+                  onSubmit={(formatted) => handleSend(formatted)}
+                />
+              }
+
             <ChatInput 
               input={input} 
               setInput={setInput} 
-              onSend={handleSend} 
+              onSend={() => handleSend()} 
               loading={loading}
               showStarters={messages.length === 0}
             />
+            <p className="text-xs text-[#cb936b] text-center mt-1">
+              This is general legal information, not legal advice. For guidance specific to your situation, consult a qualified immigration attorney.
+            </p>
           </div>
         </div>
       )}
