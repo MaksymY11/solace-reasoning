@@ -113,6 +113,14 @@ export default function Home() {
               error = true
               break
             }
+            case "done": {
+              setMessages(prev => {
+                const msg = prev.find(m => m.id === assistantId)
+                console.log("ANSWER TEXT:", msg?.sectionContent?.["Answering..."])
+                return prev
+              })
+              break
+            }
           }
         }
       }

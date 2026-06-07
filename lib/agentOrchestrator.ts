@@ -52,6 +52,7 @@ export function orchestrate(message:string): ReadableStream {
         let approvalReqId = ""
         let responseId = ""
         let currentSection = ""
+        let newSection = ""
         let lastSentLength = 0
 
         async function streamResearch(researchResponse:any) {
@@ -62,11 +63,10 @@ export function orchestrate(message:string): ReadableStream {
                     if (sectionMatch) {
                         const latestSection = sectionMatch[sectionMatch.length - 1].replace(/[\[\]]/g, "")
                         if (latestSection !== currentSection) {
-                            currentSection = latestSection
-                            const event: SectionEvent = {type: "section", data: {name: currentSection as any}}
-                            controller.enqueue(`data: ${JSON.stringify(event)}\n\n`)
+                            newSection = latestSection
                         }
                     }
+
                     const cleanedFull = researchResult
                         .replace(/\[[^\]]+\.\.\.\]/g, "")
                         .replace(/\[[^\]]*$/, "")
@@ -75,6 +75,13 @@ export function orchestrate(message:string): ReadableStream {
                         lastSentLength = cleanedFull.length
                         const event: ContentEvent = {type: "content", data: {text: newContent, section: currentSection || undefined}};
                         controller.enqueue(`data: ${JSON.stringify(event)}\n\n`)
+                    }
+
+                    if (newSection) {
+                        currentSection = newSection
+                        const event: SectionEvent = {type: "section", data: {name: currentSection as any}}
+                        controller.enqueue(`data: ${JSON.stringify(event)}\n\n`)
+                        newSection = ""
                     }
                 }
                 if (chunk.type === "response.output_item.added" && chunk.item.type === "mcp_approval_request") {

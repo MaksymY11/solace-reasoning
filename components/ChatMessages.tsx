@@ -3,6 +3,7 @@
 import { Message } from "@/lib/types"
 import { useRef,useEffect } from "react"
 import { ReasoningChain } from "./ReasoningChain"
+import { parseCitations } from "@/lib/parseCitations"
 
 export function ChatMessages(props: {
     messages: Message[]
@@ -18,7 +19,7 @@ export function ChatMessages(props: {
         }}, [isLoading])
 
     return (
-        <div className="flex-1 overflow-y-auto pb-92">
+        <div className="flex-1 overflow-y-auto pb-105">
             {props.messages.map(msg => {
                 return (
                     <div key={msg.id} className={msg.role === "user" ? "flex justify-end" : "text-left"}>
@@ -33,7 +34,26 @@ export function ChatMessages(props: {
                                     reasoningSteps={msg.reasoningSteps}
                                     sectionContent={msg.sectionContent}
                                 />
-                                {msg.loading ? null : (msg.sectionContent?.["Answering..."] ?? msg.content)}
+                                {msg.loading ? null : (() => {
+                                    const {cleanedText, citations} = parseCitations(msg.sectionContent?.["Answering..."] ?? msg.content, msg.sectionContent?.["Citations..."])
+                                    return (
+                                        <>
+                                            {cleanedText}
+                                            {citations.length > 0 && (
+                                                <div className="flex flex-wrap gap-2 mt-3">
+                                                    {citations.map((c,i) => (
+                                                        <a key={i} href={c.url} target="_blank" rel="noopener noreferrer"
+                                                           className="inline-flex items-center px-3 py-1 rounded-full border 
+                                                           border-[#017b80] text-[#017b80] text-xs hover:bg-[#017b80] hover:text-white transition"
+                                                        >
+                                                            {c.name}
+                                                        </a>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </>
+                                    )
+                                })()}
                             </>
                         ) : (
                             msg.content

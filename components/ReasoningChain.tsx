@@ -27,7 +27,7 @@ export function ReasoningChain(props: {
                             <p><strong>Summary: </strong>{props.triage.summary}</p>
                         </div>
                     )}
-                    {(props.reasoningSteps ?? []).filter(s => s.label !== "Answering...").map((step, i, arr) => {
+                    {(props.reasoningSteps ?? []).filter(s => s.label !== "Answering..." && s.label !== "Citations...").map((step, i, arr) => {
                         const isLast = i === arr.length - 1
                         const icon = props.loading && isLast ? "●" : "✓"
                         const detail = step.type === "tool"

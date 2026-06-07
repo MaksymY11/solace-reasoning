@@ -30,7 +30,7 @@ export interface ToolActivityEvent {
 export interface SectionEvent {
     type: "section",
     data: {
-        name: "Analyzing your question..." | "Researching sources..." | "Applying to your situation..." | "Evaluating confidence..." | "Answering..."
+        name: "Analyzing your question..." | "Researching sources..." | "Applying to your situation..." | "Evaluating confidence..." | "Answering..." | "Citations..."
     }
 }
 
