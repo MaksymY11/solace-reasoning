@@ -22,15 +22,16 @@ export const metadata: Metadata = {
   description: "Immigration Rights AI Agent — understand your legal rights in the US, grounded in federal sources.",
   openGraph: {
     title: "Solace",
+    siteName: "Solace",
     description: "Immigration Rights AI Agent — understand your legal rights in the US, grounded in federal sources.",
-    images: ["/og-solace"],
+    images: ["/og-solace.png"],
     type: "website"
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "Solace",
     description: "Immigration Rights AI Agent — understand your legal rights in the US, grounded in federal sources.",
-    images: ["/og-solace"],
+    images: ["/og-solace.png"],
   },
 };
 
