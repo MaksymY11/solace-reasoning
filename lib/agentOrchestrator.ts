@@ -2,6 +2,7 @@
 
 import { auditLog } from "./auditLog";
 import { getClient } from "./foundryClient";
+import { StreamParser } from "./streamParser";
 import { TriageEvent, ErrorEvent, ContentEvent, FeedbackEvent, DoneEvent, ToolActivityEvent, SectionEvent } from "./types";
 
 const solace_triage = process.env.AZURE_TRIAGE_AGENT_ID!;
@@ -93,40 +94,28 @@ export function orchestrate(message:string, history: {role: string, content: str
         // until approved. This helper auto-approves and continues streaming.
         let approvalReqId = ""
         let responseId = ""
-        let currentSection = ""
-        let newSection = ""
-        let lastSentLength = 0
+        const parser = new StreamParser()
         const toolEvents: ToolActivityEvent[] = [] // for logging
 
         async function streamResearch(researchResponse:any) {
             for await (const chunk of researchResponse) {
                 if (chunk.type === "response.output_text.delta") {
                     researchResult += chunk.delta;
-                    const sectionMatch = researchResult.match(/\[([^\]]+\.\.\.)\]/g)
-                    if (sectionMatch) {
-                        const latestSection = sectionMatch[sectionMatch.length - 1].replace(/[\[\]]/g, "")
-                        if (latestSection !== currentSection) {
-                            newSection = latestSection
+                    const events = parser.accept(chunk.delta);
+                    for (const event of events) {
+                        if (event.type === "content") {
+                            const contentEvent: ContentEvent = {
+                                type: "content",
+                                data: {text: event.text, section: event.section || undefined},
+                            };
+                            controller.enqueue(`data: ${JSON.stringify(contentEvent)}\n\n`);
+                        } else if (event.type === "section") {
+                            const sectionEvent: SectionEvent = {
+                                type: "section",
+                                data: {name: event.section as SectionEvent["data"]["name"]},
+                            };
+                            controller.enqueue(`data: ${JSON.stringify(sectionEvent)}\n\n`);
                         }
-                    }
-
-                    // Strip complete [Section...] headers, hold back incomplete ones split across chunks
-                    const cleanedFull = researchResult
-                        .replace(/\[[^\]]+\.\.\.\]/g, "")
-                        .replace(/\[[^\]]*$/, "")
-                    const newContent = cleanedFull.slice(lastSentLength)
-                    if (newContent) {
-                        lastSentLength = cleanedFull.length
-                        const event: ContentEvent = {type: "content", data: {text: newContent, section: currentSection || undefined}};
-                        controller.enqueue(`data: ${JSON.stringify(event)}\n\n`)
-                    }
-
-                    // Flush content under old section before switching to avoid cross-section leaking
-                    if (newSection) {
-                        currentSection = newSection
-                        const event: SectionEvent = {type: "section", data: {name: currentSection as SectionEvent["data"]["name"]}}
-                        controller.enqueue(`data: ${JSON.stringify(event)}\n\n`)
-                        newSection = ""
                     }
                 }
                 if (chunk.type === "response.output_item.added" && chunk.item.type === "mcp_approval_request") {

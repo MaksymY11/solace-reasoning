@@ -5,6 +5,7 @@ import { Message } from "@/lib/types"
 import { useRef,useEffect, useState } from "react"
 import { ReasoningChain } from "./ReasoningChain"
 import { parseCitations } from "@/lib/parseCitations"
+import Markdown from "react-markdown"
 
 export function ChatMessages(props: {
     messages: Message[]
@@ -37,7 +38,7 @@ export function ChatMessages(props: {
                     <article key={msg.id} className={msg.role === "user" ? "flex justify-end" : "text-left"}>
                         <div className={msg.role === "user"
                             ? "inline-flex items-start justify-start bg-[#6bc6af] text-black rounded-lg px-4 py-2 text-left whitespace-pre-wrap"
-                            : "text-black py-2 whitespace-pre-wrap"}>
+                            : "text-black py-2"}>
                         {msg.role === "assistant" ? (
                             <>
                                 {msg.distress && (
@@ -58,17 +59,19 @@ export function ChatMessages(props: {
                                     reasoningSteps={msg.reasoningSteps}
                                     sectionContent={msg.sectionContent}
                                 />}
-                                {/* Stream raw answer text in real-time during loading; replaced by cleaned version on completion */}
+                                {/* Stream markdown-rendered answer text in real-time during loading; replaced by cleaned version on completion */}
                                 {msg.loading && msg.sectionContent?.["Answering..."] && (
-                                    <p className="mt-4 whitespace-pre-wrap animate-fade-in">
-                                        {msg.sectionContent["Answering..."]}
-                                    </p>
+                                    <div className="mt-4 animate-fade-in prose max-w-none text-black">
+                                        <Markdown>{msg.sectionContent["Answering..."]}</Markdown>
+                                    </div>
                                 )}
                                 {msg.loading ? null : (() => {
                                     const {cleanedText, citations} = parseCitations(msg.sectionContent?.["Answering..."] ?? msg.content, msg.sectionContent?.["Citations..."])
                                     return (
                                         <>
-                                            {cleanedText}
+                                            <div className="prose max-w-none text-black">
+                                                <Markdown>{cleanedText}</Markdown>
+                                            </div>
                                             {citations.length > 0 && (
                                                 <div className="flex flex-wrap gap-2 mt-3">
                                                     {citations.map((c,i) => (
