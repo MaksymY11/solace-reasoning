@@ -69,7 +69,7 @@ export function ChatMessages(props: {
                                     const {cleanedText, citations} = parseCitations(msg.sectionContent?.["Answering..."] ?? msg.content, msg.sectionContent?.["Citations..."])
                                     return (
                                         <>
-                                            <div className="prose max-w-none text-black">
+                                            <div className="prose max-w-none text-black prose-li:text-black prose-ol:text-black prose-ul:text-black prose-headings:text-black prose-p:text-black prose-a:text-[#017b80]" style={{"--tw-prose-bullets":"black","--tw-prose-counters":"black"} as React.CSSProperties}>
                                                 <Markdown>{cleanedText}</Markdown>
                                             </div>
                                             {citations.length > 0 && (

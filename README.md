@@ -46,7 +46,7 @@ Solace bridges that gap. It provides accurate, cited legal information grounded 
   | **Triage Agent** | gpt-4.1-mini | Classifies intent, extracts structured facts (visa type, status, dates), assesses complexity | Fast + cheap — classification doesn't need deep reasoning |
   | **Research Agent** | gpt-4.1 | Searches Bing + USCIS Knowledge Base, reasons over sources, writes a cited answer with confidence assessment | Full-size model for multi-source legal reasoning and citation accuracy |
   | **Feedback Agent** | gpt-4.1-mini | Identifies information gaps, generates follow-up questions with multiple-choice options, recommends next steps | Structured output from existing context — no retrieval needed |
-- **Foundry IQ knowledge grounding** — 11 volumes of the USCIS Policy Manual indexed via Azure AI Search, plus Bing web search for current policy updates
+- **Foundry IQ knowledge grounding** — 11 volumes of the USCIS Policy Manual indexed via Azure AI Search, plus Grounding with Bing Search for cited web sources
 - **Confidence gate** — Research agent self-assesses confidence (HIGH/MEDIUM/LOW). The answer is always delivered, but low-confidence responses are accompanied by an attorney referral banner with specific next steps — Solace informs, it never withholds
 
 ### 🎨 User Experience
@@ -78,7 +78,15 @@ Solace uses a three-agent pipeline that mirrors how an immigration law firm hand
   <img src="public/solace_diagram.png" alt="Solace architecture diagram" width="700" />
 </p>
 
-**Foundry IQ layer:** The Research Agent is grounded in a knowledge base containing the USCIS Policy Manual (Volumes 1–4, 6–12), indexed with `text-embedding-3-small` embeddings via Azure AI Search. Combined with Bing web search, this ensures answers are sourced from authoritative federal documents and current policy.
+**Foundry IQ layer:** The Research Agent is grounded in a knowledge base containing the USCIS Policy Manual (Volumes 1–4, 6–12), indexed with `text-embedding-3-small` embeddings via Azure AI Search. Combined with Grounding with Bing Search, this ensures answers are sourced from authoritative federal documents and current policy.
+
+### 🔧 Tools
+
+| Tool | What it does | Why |
+|------|-------------|-----|
+| **Azure AI Search (Knowledge Base)** | Indexes 11 volumes of the USCIS Policy Manual with vector embeddings | Deep retrieval from authoritative federal sources — the model reasons over real policy, not training data |
+| **Grounding with Bing Search** | Returns web results with verified URLs for citation | Eliminates hallucinated links — citation accuracy went from ~50% to 100% |
+| **Azure Content Filters** | Custom guardrail blocks prompt injection and off-topic abuse | Safety at the model layer, not brittle client-side regex |
 
 ## 🧰 Tech Stack
 
@@ -111,17 +119,13 @@ Solace uses a three-agent pipeline that mirrors how an immigration law firm hand
 npm test
 ```
 
-The `StreamParser` — which handles real-time SSE chunk parsing, section header detection, and cross-section content buffering — is covered by 7 test cases:
+50 tests across three critical modules:
 
-| Test | What it verifies |
-|------|-----------------|
-| Split headers | Section headers split across multiple chunks are buffered and reassembled |
-| Multi-header chunks | Multiple section headers in a single chunk are parsed sequentially |
-| Bracket disambiguation | Regular brackets like `[Form I-485]` are not mistaken for section headers |
-| Cross-section flush | Content before a new section is tagged with the previous section |
-| Empty deltas | Empty input produces no events |
-| Buffer drain | `flush()` emits remaining buffered text at end of stream |
-| Realistic sequence | Multi-chunk simulation combining regular brackets, section switches, and streamed content |
+| Module | Tests | What it covers |
+|--------|-------|---------------|
+| `StreamParser` | 7 | SSE chunk parsing — split headers, bracket disambiguation, cross-section flush, buffer drain |
+| `Safety` | 37 | Distress detection (DV, self-harm, trafficking), false positives on normal immigration queries, input sanitization |
+| `Citations` | 6 | Citation parsing from agent output, malformed lines, markdown link cleanup, graceful fallback |
 
 ## 🤝 GitHub Copilot
 

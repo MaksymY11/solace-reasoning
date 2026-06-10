@@ -4,6 +4,7 @@
 
 import { TriageResult } from "@/lib/types"
 import { useState } from "react"
+import Markdown from "react-markdown"
 
 export function ReasoningChain(props: {
     triage: TriageResult | undefined
@@ -44,7 +45,7 @@ export function ReasoningChain(props: {
                                     }
                                     {step.label}
                                 </p>
-                                {detail && <p className="text-xs text-gray-500 ml-5 whitespace-pre-wrap animate-fade-in">{detail}</p>}
+                                {detail && <div className="text-xs text-gray-500 ml-5 animate-fade-in prose prose-xs max-w-none prose-headings:text-gray-500 prose-strong:text-gray-500 prose-li:text-gray-500 prose-p:text-gray-500 prose-a:text-gray-500"><Markdown>{detail}</Markdown></div>}
                             </div>
                         )
                     })}
