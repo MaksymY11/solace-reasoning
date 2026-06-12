@@ -22,11 +22,16 @@
 </p>
 
 <p align="center">
-  <a href="https://asksolace.vercel.app/"><strong>Try Solace Live →</strong></a>
-</p>
-
-<p align="center">
   <img src="public/solace_demo.gif" alt="Solace demo — asking about rights when detained by ICE" width="700" />
+</p>
+<p align="center">
+  <a href="https://youtu.be/Z-xfSGtm9Ss">
+    <img src="https://img.shields.io/badge/YouTube-Watch%20Demo-red?style=for-the-badge&logo=youtube&logoColor=white" alt="Watch Demo on YouTube" />
+  </a>
+  &nbsp;
+  <a href="https://asksolace.vercel.app/">
+    <img src="https://img.shields.io/badge/Vercel-Try%20Solace%20Live-black?style=for-the-badge&logo=vercel&logoColor=white" alt="Try Solace Live" />
+  </a>
 </p>
 
 ## 💡 The Problem
