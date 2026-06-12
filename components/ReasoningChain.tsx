@@ -11,6 +11,7 @@ export function ReasoningChain(props: {
     loading: boolean
     reasoningSteps?: {type: "section" | "tool", label: string, detail?:string}[]
     sectionContent?: Record<string, string>
+    ui?: Record<string, string>
 }) {
     const [toggled, setToggled] = useState(false)
     const expanded = props.loading || toggled
@@ -58,7 +59,9 @@ export function ReasoningChain(props: {
                         onClick={() => setToggled(prev => !prev)}
                         className="text-sm px-2 py-1 mb-2 rounded-md border border-[#017b80] bg-[#017b80] text-[#fff7e1] hover:bg-[#015f63]"
                     >
-                        {toggled ? "Hide reasoning" : "Show reasoning"}
+                        {toggled
+                            ? (props.ui?.["Hide reasoning"] ?? "Hide reasoning")
+                            : (props.ui?.["Show reasoning"] ?? "Show reasoning")}
                     </button>
                 </div>
             )}

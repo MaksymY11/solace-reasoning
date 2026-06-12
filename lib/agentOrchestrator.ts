@@ -3,7 +3,8 @@
 import { auditLog } from "./auditLog";
 import { getClient } from "./foundryClient";
 import { StreamParser } from "./streamParser";
-import { TriageEvent, ErrorEvent, ContentEvent, FeedbackEvent, DoneEvent, ToolActivityEvent, SectionEvent } from "./types";
+import { translateResponse } from "./translator";
+import { TriageEvent, ErrorEvent, ContentEvent, FeedbackEvent, DoneEvent, ToolActivityEvent, SectionEvent, TranslateEvent } from "./types";
 
 const solace_triage = process.env.AZURE_TRIAGE_AGENT_ID!;
 const solace_research = process.env.AZURE_RESEARCH_AGENT_ID!;
@@ -276,6 +277,17 @@ export function orchestrate(message:string, history: {role: string, content: str
             },
         }
         auditLog(entry)
+
+        // Translating Contents (non-streaming)
+        try {
+            const translation = await translateResponse(message, triageResult, researchResult, feedbackResult)
+            if (translation) {
+                const event: TranslateEvent = {type: "translate", data: translation }
+                controller.enqueue(`data: ${JSON.stringify(event)}\n\n`)
+            }
+        } catch (e) {
+            console.error("Translation failed, serving English response:", e)
+        }
 
         // Done Flag
         const event: DoneEvent = {

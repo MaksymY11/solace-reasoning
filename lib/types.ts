@@ -18,6 +18,7 @@ export interface Message {
     }[],
     sectionContent?: Record<string, string>,
     distress?: string[],
+    ui?: Record<string, string>,
 }
 
 export interface ToolActivityEvent {
@@ -38,6 +39,16 @@ export interface SectionEvent {
     type: "section",
     data: {
         name: "Analyzing your question..." | "Researching sources..." | "Applying to your situation..." | "Evaluating confidence..." | "Answering..." | "Citations..."
+    }
+}
+
+export interface TranslateEvent {
+    type: "translate",
+    data: {
+        triage?: TriageResult,
+        sectionContent: Record<string, string>,
+        feedback?: FeedbackResult,
+        ui?: Record<string, string>,
     }
 }
 
@@ -116,4 +127,4 @@ export interface DoneEvent {
 
 export type SSEEvent = TriageEvent | ReasoningStepEvent | ContentEvent |
                        CitationEvent | FeedbackEvent | ErrorEvent | DoneEvent |
-                       ToolActivityEvent | SectionEvent | DistressEvent
+                       ToolActivityEvent | SectionEvent | DistressEvent | TranslateEvent

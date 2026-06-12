@@ -58,6 +58,7 @@ export function ChatMessages(props: {
                                     loading={msg.loading ?? false}
                                     reasoningSteps={msg.reasoningSteps}
                                     sectionContent={msg.sectionContent}
+                                    ui={msg.ui}
                                 />}
                                 {/* Stream markdown-rendered answer text in real-time during loading; replaced by cleaned version on completion */}
                                 {msg.loading && msg.sectionContent?.["Answering..."] && (
@@ -95,14 +96,14 @@ export function ChatMessages(props: {
                             <>
                                 {msg.feedback.needs_attorney && (
                                     <div className="rounded-lg border-l-4 border-[#f79f7b] bg-[#efe5cb] p-4 mt-4">
-                                        <p className="font-semibold text-md">Consult an attorney</p>
+                                        <p className="font-semibold text-md">{msg.ui?.["Consult an attorney"] ?? "Consult an attorney"}</p>
                                         <p className="mt-1 text-sm">{msg.feedback.next_steps[0]}</p>
                                     </div>
                                 )}
 
                                 {msg.feedback.next_steps.length > 0 && (
                                     <div className="mt-4">
-                                        <p className="font-semibold text-sm">Next steps</p>
+                                        <p className="font-semibold text-sm">{msg.ui?.["Next steps"] ?? "Next steps"}</p>
                                         <ol className="list-decimal pl-5 mt-1 text-sm space-y-1">
                                             {(msg.feedback.needs_attorney 
                                                 ? msg.feedback.next_steps.slice(1)
@@ -114,7 +115,7 @@ export function ChatMessages(props: {
 
                                 {msg.feedback.follow_up_questions.some(q => q.options !== null) && (
                                     <p className="mt-4 text-sm italic text-gray-600">
-                                        To provide better guidance, please answer the questions below.
+                                        {msg.ui?.["To provide better guidance, please answer the questions below."] ?? "To provide better guidance, please answer the questions below."}
                                     </p>
                                 )}
                             </>

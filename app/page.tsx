@@ -142,6 +142,20 @@ export default function Home() {
                ))
                break
             }
+            case "translate": {
+              setMessages(prev => prev.map(m => {
+                if (m.id !== assistantId) return m
+                return {
+                  ...m,
+                  triage: event.data.triage ?? m.triage,
+                  sectionContent: {...m.sectionContent, ...event.data.sectionContent},
+                  feedback: event.data.feedback ?? m.feedback,
+                  content: event.data.sectionContent["Answering..."] ?? m.content,
+                  ui: event.data.ui,
+                }
+              }))
+              break
+            }
             case "done": {
               setMessages(prev => {
                 const msg = prev.find(m => m.id === assistantId)
@@ -244,19 +258,21 @@ export default function Home() {
                   questions={filteredQuestions}
                   onSubmit={(formatted) => handleSend(formatted)}
                   onDismiss={() => setShowForm(false)}
+                  ui={lastMessage?.ui}
                 />
               }
 
-            <ChatInput 
-              input={input} 
-              setInput={setInput} 
-              onSend={() => handleSend()} 
+            <ChatInput
+              input={input}
+              setInput={setInput}
+              onSend={() => handleSend()}
               loading={loading}
               showStarters={messages.length === 0}
               onStop={() => handleAbort()}
+              ui={lastMessage?.ui}
             />
             <p className="text-xs text-[#8a6340] text-center mt-1">
-              This is general legal information, not legal advice. For guidance specific to your situation, consult a qualified immigration attorney.
+              {lastMessage?.ui?.["This is general legal information, not legal advice. For guidance specific to your situation, consult a qualified immigration attorney."] ?? "This is general legal information, not legal advice. For guidance specific to your situation, consult a qualified immigration attorney."}
             </p>
           </div>
         </footer>

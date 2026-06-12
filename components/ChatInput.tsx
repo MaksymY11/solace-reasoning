@@ -9,6 +9,7 @@ export function ChatInput(props: {
     loading: boolean,
     showStarters: boolean,
     onStop: () => void,
+    ui?: Record<string, string>,
 }) {
 
     function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
@@ -25,7 +26,7 @@ export function ChatInput(props: {
                 value={props.input}
                 onChange={(e)=>props.setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder={props.showStarters ? "Ask about your immigration rights..." : "Write a message..."}
+                placeholder={props.showStarters ? "Ask about your immigration rights..." : (props.ui?.["Write a message..."] ?? "Write a message...")}
                 aria-label="Message input"
                 />
                 {props.input.trim() && !props.loading && (

@@ -57,6 +57,7 @@ Solace bridges that gap. It provides accurate, cited legal information grounded 
 | **Citation pills** | Every claim links back to its source as clickable chips | Legal information without a source is just an opinion |
 | **Follow-up form** | Interactive multiple-choice questions to refine the user's situation | Immigration cases are fact-specific — the first question rarely has enough detail |
 | **Conversation memory** | Follow-up questions retain context from prior exchanges | Users shouldn't have to re-explain their situation every message |
+| **Automatic translation** | Detects the user's language and translates the full response — answer, reasoning chain, feedback, and UI chrome | An app for immigrants shouldn't assume they all read English |
 
 ### 🛡️ Safety & Accessibility
 
@@ -87,6 +88,7 @@ Solace uses a three-agent pipeline that mirrors how an immigration law firm hand
 | **Azure AI Search (Knowledge Base)** | Indexes 11 volumes of the USCIS Policy Manual with vector embeddings | Deep retrieval from authoritative federal sources — the model reasons over real policy, not training data |
 | **Grounding with Bing Search** | Returns web results with verified URLs for citation | Eliminates hallucinated links — citation accuracy went from ~50% to 100% |
 | **Azure Content Filters** | Custom guardrail blocks prompt injection and off-topic abuse | Safety at the model layer, not brittle client-side regex |
+| **Azure Translator** | Detects input language and batch-translates all user-facing content post-response | Automatic multilingual support without fragile prompt engineering |
 
 ## 🧰 Tech Stack
 
@@ -97,6 +99,7 @@ Solace uses a three-agent pipeline that mirrors how an immigration law firm hand
 | AI Agents | Azure AI Foundry (3 agents), gpt-4.1, gpt-4.1-mini |
 | Knowledge | Azure AI Search, USCIS Policy Manual (11 volumes) |
 | Web Search | Bing Search via Foundry MCP tools |
+| Translation | Azure Translator API (language detection + batch translation) |
 | Auth | `DefaultAzureCredential` (local), `ClientSecretCredential` (production) |
 | Deployment | Vercel |
 
@@ -107,8 +110,8 @@ Solace uses a three-agent pipeline that mirrors how an immigration law firm hand
 |-----------|--------|-------------------------|
 | **Accuracy & Relevance** | 20% | Grounded in 11 volumes of the USCIS Policy Manual via Foundry IQ + Bing web search; citations link every claim to its source |
 | **Reasoning & Multi-step Thinking** | 20% | Three-agent pipeline — triage classifies and extracts facts, research retrieves and reasons across sources, feedback identifies gaps and generates follow-ups |
-| **Creativity & Originality** | 15% | Real-time reasoning chain lets users watch the agent think; confidence gate supplements answers with attorney referrals instead of withholding information; crisis detection surfaces hotlines for users in distress |
-| **UX & Presentation** | 15% | Calming visual design, streaming answers, interactive follow-up form, citation pills, mobile-responsive, custom animations |
+| **Creativity & Originality** | 15% | Real-time reasoning chain lets users watch the agent think; confidence gate supplements answers with attorney referrals instead of withholding information; crisis detection surfaces hotlines for users in distress; automatic multilingual support via post-response translation |
+| **UX & Presentation** | 15% | Calming visual design, streaming answers, interactive follow-up form, citation pills, automatic translation of all UI elements, mobile-responsive, custom animations |
 | **Reliability & Safety** | 20% | Azure content filter guardrails, input sanitization, distress detection, structured audit logging, confidence-based attorney referral, legal disclaimer |
 | **Community Vote** | 10% | [Vote on Discord](https://aka.ms/agentsleague/discord) |
 
@@ -149,6 +152,7 @@ See `public/copilot_usage/` for annotated screenshots of each interaction.
   - A gpt-4.1 model deployment
   - Azure AI Search resource with a knowledge base
   - Bing Search MCP tool connected to the Research agent
+  - Azure Translator resource (Free F0 tier)
 - Azure CLI (`az login` for local authentication)
 
 ### Installation
@@ -168,6 +172,8 @@ AZURE_FOUNDRY_ENDPOINT=https://your-resource.services.ai.azure.com/api/projects/
 AZURE_TRIAGE_AGENT_ID=your-triage-agent-name
 AZURE_RESEARCH_AGENT_ID=your-research-agent-name
 AZURE_FEEDBACK_AGENT_ID=your-feedback-agent-name
+AZURE_TRANSLATOR_KEY=your-translator-key
+AZURE_TRANSLATOR_REGION=your-translator-region
 ```
 
 ### Run Locally
@@ -207,6 +213,7 @@ solace/
 │   ├── agentOrchestrator.ts    # Three-agent pipeline + SSE events
 │   ├── streamParser.ts         # SSE chunk parser + section tracker
 │   ├── foundryClient.ts        # Azure AI Foundry client singleton
+│   ├── translator.ts           # Azure Translator — language detection + batch translation
 │   ├── parseCitations.ts       # Citation extraction + pill formatting
 │   ├── safety.ts               # Input sanitization + crisis detection
 │   ├── auditLog.ts             # Structured JSON audit logging

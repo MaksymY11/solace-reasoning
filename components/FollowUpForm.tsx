@@ -8,6 +8,7 @@ export function FollowUpForm(props: {
     questions: FollowUpQuestion[],
     onSubmit: (formatted: string) => void,
     onDismiss: () => void,
+    ui?: Record<string, string>,
 }) {
     const [currIdx, setCurrIdx] = useState(0)
     const [answers, setAnswers] = useState<string[]>(new Array(props.questions.length).fill(""))
@@ -93,7 +94,7 @@ export function FollowUpForm(props: {
                         aria-label="Type your answer"
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
-                        placeholder="Your answer"
+                        placeholder={props.ui?.["Your answer"] ?? "Your answer"}
                         className="flex-1 text-sm outline-none bg-transparent"
                     />
 
@@ -102,7 +103,7 @@ export function FollowUpForm(props: {
                         onClick={() => { handleAnswer('[No preference]'); setInputValue("") }}
                         className="text-sm px-2 py-1 rounded-md border border-[#017b80] bg-[#017b80] text-[#fff7e1] hover:bg-[#015f63]"
                     >
-                        Skip
+                        {props.ui?.["Skip"] ?? "Skip"}
                     </button>
                 </form>
             </div>

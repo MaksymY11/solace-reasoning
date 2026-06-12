@@ -50,7 +50,7 @@ export class StreamParser {
             const candidate = this.buffer.slice(0, closeIndex + 1);
             if (SECTION_HEADER_REGEX.test(candidate)) {
                 this.buffer = this.buffer.slice(closeIndex + 1);
-                const sectionName = candidate.slice(1, -1);
+                const sectionName = candidate.slice(1, -1).trim();
                 if (sectionName !== this.currentSection) {
                     this.currentSection = sectionName;
                     events.push({ type: "section", section: sectionName });
