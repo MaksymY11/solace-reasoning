@@ -127,13 +127,15 @@ Solace uses a three-agent pipeline that mirrors how an immigration law firm hand
 npm test
 ```
 
-50 tests across three critical modules:
+75 tests across five modules:
 
 | Module | Tests | What it covers |
 |--------|-------|---------------|
 | `StreamParser` | 7 | SSE chunk parsing — split headers, bracket disambiguation, cross-section flush, buffer drain |
 | `Safety` | 37 | Distress detection (DV, self-harm, trafficking), false positives on normal immigration queries, input sanitization |
 | `Citations` | 6 | Citation parsing from agent output, malformed lines, markdown link cleanup, graceful fallback |
+| `AuditLog` | 7 | Structured JSON output shape, partial failure logs, distress flags, tool call arrays |
+| `Translator` | 18 | Language detection, batch translation, slice-back reconstruction, sparse facts, empty feedback |
 
 ## 🤝 GitHub Copilot
 
@@ -223,10 +225,12 @@ solace/
 │   ├── safety.ts               # Input sanitization + crisis detection
 │   ├── auditLog.ts             # Structured JSON audit logging
 │   ├── types.ts                # Shared TypeScript types
-│   └── tests/                  # Jest test suites (50 tests)
+│   └── tests/                  # Jest test suites (75 tests)
 │       ├── streamParser.test.ts
 │       ├── safety.test.ts
-│       └── parseCitations.test.ts
+│       ├── parseCitations.test.ts
+│       ├── auditLog.test.ts
+│       └── translator.test.ts
 └── public/
     ├── solace_logo.png         # Logo assets
     └── copilot_usage/          # Copilot Chat screenshots
